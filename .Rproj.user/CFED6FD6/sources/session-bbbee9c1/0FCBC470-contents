@@ -1,0 +1,139 @@
+################################################################################
+# Title: Prep food groups for DASH score calculation // CDRF & HLI
+# Author: Robbie Pope
+# Date: 01 Oct 2024
+# Description: Defintion of DASH food groups for calculation as computed by:
+#              Fung et al. 2008, Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease and Stroke in Women
+#              Li et al. 2023, (Poly)phenol intake, plant-rich dietary patterns and cardiometabolic health: a cross-sectional study
+################################################################################
+rm(list=ls())
+
+# Load Libraries
+library(dplyr)
+library(glue)
+library(tidyr)
+library(readxl)
+library(devtools)
+install_github("robbiepope/DietPattern")
+library(DietPattern)
+
+# Load raw FFQ data
+setwd("/Users/robbie/Library/CloudStorage/OneDrive-King'sCollegeLondon/5_FFq_Data/")
+f3 <- read.csv("!Documentation/FFQ_Data_Processing_Protocol/4_FFQ_Processed_Data/FFQ3/ffq3_processed_ffqline.csv")
+f3b <- read.csv("!Documentation/FFQ_Data_Processing_Protocol/4_FFQ_Processed_Data/FFQ3b/ffq3b_processed_ffqline.csv")
+f4 <- read.csv("!Documentation/FFQ_Data_Processing_Protocol/4_FFQ_Processed_Data/FFQ4/Adjusted_for_Milk/ffq4_processed_ffqline_withmilk.csv")
+ffq_all <- rbind(f3, f3b, f4)
+
+# Load FFQ record IDs & TwinInfo
+ffq_ids <- read.csv("!Documentation/FFQ_Data_Processing_Protocol/5_MetaData/twins_ffq_ids_metadata_outliers.csv")
+twininf <- read_excel("/Users/robbie/Library/CloudStorage/OneDrive-King'sCollegeLondon/3_Datasets/!TwinDetails/TwinDetails_12.06.2024.xlsx")
+meal_ids <- read.csv("/Users/robbie/Library/CloudStorage/OneDrive-King'sCollegeLondon/5_FFq_Data/!Documentation/FFQ_Data_Processing_Protocol/1_FETA_LookupFiles/2_Adjusted_FFQ2_3_3b_4/meals_updated.csv")
+
+# Load FFQ & metabolite 3yr df
+setwd("/Users/robbie/Library/CloudStorage/OneDrive-King'sCollegeLondon/6_FFQ_Metabolite_Validation/Diet_FaecalMetabolites/1_NEW_HLI_CDRF_2024")
+load("analysis_data/2_clean_data/Cohorts/ffq_faecal_HLI_CDRF_3yr.Rdata", .GlobalEnv) # Load 3 yr dataset
+
+# Compute-Nutrient-DASH-Groups --------------------------------------------
+# Extract Sodium
+ffq_dash_sodium <- ffq_cohort_hli %>%
+  select(c(2, 38))
+
+# Pivot DF so that there are the columns ID, FFQNAME, MEAL_PORTION
+ffq_dash_sodium <- ffq_dash_sodium %>%
+  pivot_longer(cols = c(Sodium_g), 
+               names_to = "FFQNAME", 
+               values_to = "MEAL_PORTION")
+
+# Add MEAL_ID for Sodium_g (203)
+ffq_dash_sodium <- ffq_dash_sodium %>%
+  mutate(MEAL_ID = 203) %>%
+  relocate(MEAL_ID, .after=FFQ_ID) %>%
+  rename(ID = FFQ_ID)
+
+# Prep-FFQ-DASH-FoodGroup -------------------------------------------------
+# Filter for FFQs only present in clean data
+clean_ids <- as.vector(ffq_cohort_hli$FFQ_ID)
+ffq_all <- ffq_all %>%
+  filter(ID %in% clean_ids)
+
+# Remove duplicated MEAL_IDs from ffqline FETA data 
+# Meal portion (g) is duplicated due to multiple nutrients. Remove duplicates for 
+# each participant & meal ID, keeping only the meal portion
+meal_ids <- meal_ids %>% select(c(1:2))
+ffq_all <- merge(ffq_all, meal_ids, by.x='MEAL_ID', by.y='LINE.NUMBER')
+
+ffq_analysis <- ffq_all %>%
+  select(2, 1, 6, 3) %>%
+  distinct(ID, MEAL_ID, .keep_all = TRUE)
+
+# Append two DFs for final df with all meal/nutriemt IDs
+ffq_final <- rbind(ffq_analysis, ffq_dash_sodium)
+
+# Define-DASH-Food-Groups -------------------------------------------------
+# Define a list of FFQ line item names
+food_groups <- list(
+  vegetables = c('AVOCADO', 'BEANSPROUTS', 'BETROOT', 'BROCCOLI', 'CABBAGE',
+                 'CARROTS', 'CAULIFLOWER', 'COLESLAW', 'GARLIC', 'GREEN_SALAD', 
+                 'LEEKS', 'MARROW', 'MUSHROOMS', 'ONIONS', 'PARSNIPS', 'PICKLES',
+                 'PEPPERS', 'SPINACH', 'SPROUTS', 'SWEETCORN', 'TOMATOES', 
+                 'VEGETABLE_SOUP', 'WATERCRESS'),
+  fruit = c('APPLES', 'BANANAS', 'DRIED_FRUIT', 'FRUIT_JUICE', 'GRAPEFRUIT', 
+            'GRAPES', 'MELONS', 'ORANGES', 'PEACHES', 'PEARS', 'SMOOTHIES', 
+            'STRAWBERRIES', 'TINNED_FRUIT'),
+  nuts_legumes = c('BEANS', 'GREEN_BEANS', 'LENTILS', 'NUTS', 'NUTS_SALTED',
+                   'PEANUT_BUTTER', 'PEAS', 'SEEDS', 'TOFU'),
+  whole_grain = c('BROWN_BREAD', 'BROWN_RICE', 'CEREAL_FIBRE', 'PORRIDGE',
+                  'WHOLEMEAL_BREAD', 'WHOLEMEAL_PASTA'),
+  lf_dairy = c('COTTAGE_CHEESE', 'LF_CHEESE', 'LOWFAT_YOGURT'),
+  sugar_drink = c('COCOA', 'COFFEE_WHITENER', 'FIZZY_DRINKS', 'FRUIT_SQUASH',
+                  'HORLICKS', 'LF_COCOA','LOWCAL_FIZZY_DRINKS'),
+  meat = c('BACON', 'BEEF', 'BURGER', 'CORNED_BEEF', 'HAM', 'LAMB', 'LASAGNE', 
+           'LIVER', 'MEAT_SOUP', 'PORK', 'SAUSAGES'),
+  sodium = c('Sodium_g')
+  )
+  
+# Create empty list to store summary dfs
+summed_dfs <- list()
+
+# Iterate over each food group and calculate the summarised data frame
+for (group_name in names(food_groups)) {
+  foods <- food_groups[[group_name]]
+  summed_df <- ffq_final %>%
+    group_by(ID) %>%
+    summarize(total_meal_portion = sum(ifelse(FFQNAME %in% foods, MEAL_PORTION, 0))) %>%
+    ungroup()
+  summed_df$FoodGroup <- group_name
+  summed_dfs[[group_name]] <- summed_df
+}
+
+# Combine all dfs into a single data frame and re-index
+# Final DF has summed daily intake in (g) for each food group for every ID
+food_groups_df <- bind_rows(summed_dfs)
+rownames(food_groups_df) <- NULL
+
+# Add-Twin-Sex-Info -------------------------------------------------------
+# Select relevant columns from FFQ_IDs file
+ffq_ids.2 <- ffq_ids %>%
+  select(c(1, 2, 3))
+
+# Select relevant columns from twininf file 
+twininf.2 <- twininf %>%
+  select(c(2, 5))
+
+# Add Participant ID to FoodGroup df
+ffq_merge <- merge(food_groups_df, ffq_ids.2, by.x='ID', by.y='UniqueKey')
+# Add Sex info to FoodGroup df
+ffq_merge <- merge(ffq_merge, twininf.2, by.x='Participant_ID', by.y='STUDY_NO')
+
+# Pivot-Export ------------------------------------------------------------
+# Pivot df so food groups are the columns
+ffq_dash_groups <- pivot_wider(
+  data = ffq_merge,
+  id_cols = c(Participant_ID, ID, FFQ_Version, SEX),
+  names_from = FoodGroup,
+  values_from = total_meal_portion
+)
+
+setwd("/Users/robbie/Library/CloudStorage/OneDrive-King'sCollegeLondon/6_FFQ_Metabolite_Validation/Diet_FaecalMetabolites/1_NEW_HLI_CDRF_2024/analysis_data/4_diet_index")
+save(ffq_dash_groups, file=glue("ffq_HLI_DASHgroups.Rdata"))
+

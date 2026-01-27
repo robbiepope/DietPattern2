@@ -1,0 +1,78 @@
+library(dplyr)
+# TESTING
+rm(list=ls())
+ffq1 <- read.csv("/Users/k23108931/Library/CloudStorage/OneDrive-King\'sCollegeLondon/4_PhD_Analysis/1_FFq_Data/!Documentation/FFQ_Data_Processing_Protocol/6_GramsDayFood/final/ffq1_processed_foods_grams_per_day.csv")
+ffq2 <- read.csv("/Users/k23108931/Library/CloudStorage/OneDrive-King\'sCollegeLondon/4_PhD_Analysis/1_FFq_Data/!Documentation/FFQ_Data_Processing_Protocol/6_GramsDayFood/final/ffq2_processed_foods_grams_per_day.csv")
+ffq2.nutr <- read.csv("/Users/k23108931/Library/CloudStorage/OneDrive-King\'sCollegeLondon/4_PhD_Analysis/1_FFq_Data/!Documentation/FFQ_Data_Processing_Protocol/7_Nutrient_Estimates/cleaned/ffq2_processed_daily_nutrient_estimates.csv")
+source("/Users/k23108931/Library/CloudStorage/OneDrive-King\'sCollegeLondon/4_PhD_Analysis/1_FFq_Data/1_LEAP_Github/RLibrary/DietPattern/calculate_DASH.R")
+source("/Users/k23108931/Library/CloudStorage/OneDrive-King\'sCollegeLondon/4_PhD_Analysis/1_FFq_Data/1_LEAP_Github/RLibrary/DietPattern/calculate_pdi.R")
+
+testf2 <- compute_twinsuk_dash(est.intakes = ffq2, 
+                               nutr.intakes = ffq2.nutr)
+
+testf2 <- get_dash_components(est.intakes = ffq2, 
+                              nutr.intakes = ffq2.nutr,
+                              stnd_components = 'Y')
+
+
+
+testf22 <- assign_dash_health_groups(testf2)
+
+
+testf22_p <- assign_percentile(testf22)
+
+hhh <- assign_dash_scores(testf22_p)
+
+ggg <- testf22_p %>% 
+  filter(FoodGroup == 'vegetables')
+
+testf1 <- get_food_bev_groups(ffq1, stnd_groups = 'Y')
+testf2 <- get_food_bev_groups(ffq2, stnd_groups = 'Y')
+
+
+# Assign food groups into healthy/less healthy/animal categories
+long_df <- assign_health_groups(testf2)
+
+# Assign percentile of intake (rank within each food group)
+long_df <- assign_percentile(long_df, perc = 0.2)
+
+# Assign scores for PDI, hPDI, uPDI
+long_df <- assign_pdi_scores(long_df)
+
+#  Sum scores per individual to get total indices
+df_scores <- sum_pdi_scores(long_df)
+
+mean(df_scores$hPDI)
+
+test2 <- long_df %>% 
+  filter(UniqueKey == 4960)
+
+test3 <- long_df %>%
+  filter(FoodGroup == 'nuts_seeds')
+
+
+
+#line1 <- ffq1[1, ]
+#line2 <- ffq2[1, ]
+
+
+#group1 <- line1 %>% 
+#  select(c('BUTTER'))
+#group2 <- line2 %>% 
+#  select(c('BUTTER', 'REDUCED_FAT_BUTTER'))
+
+long <- assign_health_groups(testf1)
+perc_long <- assign_percentile(long)
+
+test <- perc_long %>% 
+  filter(FoodGroup == "legumes")
+
+
+pdi1 <- twinsuk_pdi(ffq1)
+pdi2 <- twinsuk_pdi(ffq2)
+pdi3 <- twinsuk_pdi(ffq3)
+pdi3b <- twinsuk_pdi(ffq3b)
+pdi3c <- twinsuk_pdi(ffq3c)
+pdi3d <- twinsuk_pdi(ffq3d)
+pdi4 <- twinsuk_pdi(ffq4)
+

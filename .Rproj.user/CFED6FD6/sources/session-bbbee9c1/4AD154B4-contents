@@ -1,0 +1,105 @@
+################################################################################
+# Title: Metagenome Pathways 
+# Author: Robbie Pope
+# Date: 24 October 2025
+################################################################################
+rm(list=ls())
+
+# Load libraries
+library(dplyr)
+library(compositions)
+library(glue)
+
+# Load data
+setwd("/Users/k23108931/Library/CloudStorage/OneDrive-King\'sCollegeLondon/")
+load("4_PhD_Analysis/7_GutProteins_Associations/data/3_Analysis_Data/metagenome/metagenomics_species_rel_abundance_290_samples_clr_transformed.Rdata", .GlobalEnv)
+
+# Pathways
+pathway <- read.table(
+  "3_Datasets/5_Metagenome/3_GS/strata_removed_pathabundance-cpm_20211201.tsv",
+  sep = "\t",
+  header = TRUE,
+  check.names = FALSE,
+  quote = "",
+  fill = TRUE
+  )
+
+# Prep_CPM ----------------------------------------------------------------
+# Get list of all pathways 
+pathway_list <- pathway[ ,1]
+
+# Create matrix and fix pathway names
+pathway_t <- t(pathway[ ,-1]) 
+colnames(pathway_t) <- pathway_list
+rownames(pathway_t) <- gsub("_Abundance-CPM", "", rownames(pathway_t))
+
+# Remove unmapped and unintergrated 
+pathway_t <- pathway_t[ ,-c(1:2)]
+pathway_df <- as.data.frame(pathway_t)
+pathway_df$Prefix <- rownames(pathway_t)
+pathway_df <- pathway_df[, c(ncol(pathway_df), 1:(ncol(pathway_df)-1))]
+
+# Merge with samples info
+samples <- gut_metagenome %>% 
+  select(c(1:21))
+
+# Merge metadata and pathway data
+pathway_sample <- merge(samples, pathway_df, by = "Prefix")
+
+# Identify numeric columns (your pathways)
+pathway_data <- pathway_sample[, 22:ncol(pathway_sample)]
+
+# Find columns that are NOT all zeros
+nonzero_cols <- colnames(pathway_data)[colSums(pathway_data != 0) > 0]
+
+# Keep only nonzero columns (plus metadata)
+pathway_filtered <- cbind(
+  pathway_sample[, 1:21],              # metadata columns
+  pathway_data[, nonzero_cols, drop=FALSE]  # filtered pathway columns
+)
+
+# Create mapping file between original pathway names and short IDs
+pathway_map <- data.frame(
+  pw_original = pathway_list,
+  pw_id = paste0("PW", seq_along(pathway_list))
+  )
+
+# Ensure you use the filtered list of pathways
+valid_paths <- intersect(pathway_list, colnames(pathway_filtered))
+
+# Subset the mapping file to only valid pathways
+pathway_map_valid <- pathway_map[pathway_map$pw_original %in% valid_paths, ]
+
+# Rename columns safely
+colnames(pathway_filtered)[
+  match(pathway_map_valid$pw_original, colnames(pathway_filtered))
+] <- pathway_map_valid$pw_id
+
+# Log-transform-select-80% ------------------------------------------------
+# Calculate the proportion of zeros in each pathway
+zero_prop <- colMeans(pathway_data == 0, na.rm = TRUE)
+
+# Identify pathways with more than 80% zeros
+cols_with_90_percent_zeros <- names(zero_prop[zero_prop > 0.9])
+
+# Filter out those columns
+pathway_filtered_no90 <- pathway_filtered[ , !colnames(pathway_filtered) %in% cols_with_90_percent_zeros]
+
+# CLR transform
+# Add a small constant (commonly 1e-6) to all zeros
+metadata <- pathway_filtered_no90[, 1:21]
+pathway_data <- pathway_filtered_no90[, 22:ncol(pathway_filtered_no90)]
+
+# Add a small constant to zeros
+pathway_data_no0 <- pathway_data + 1e-6
+
+# Apply CLR transformation
+pathway_clr <- clr(pathway_data_no0)
+
+# Combine metadata and CLR-transformed pathways
+pathway_clr_df <- cbind(metadata, as.data.frame(pathway_clr))
+
+# Export ------------------------------------------------------------------
+setwd("/Users/k23108931/Library/CloudStorage/OneDrive-King\'sCollegeLondon/4_PhD_Analysis/7_GutProteins_Associations/data/3_Analysis_Data/cpm_paths")
+save(pathway_clr_df, file=glue("CPM_path_abundance_CLRTransformed_282.Rdata"))
+write.csv(pathway_map, "cpm_pathway_map.csv", row.names = FALSE)

@@ -1,0 +1,94 @@
+################################################################################
+# Title: Compute DASH Score // CDRF & HLI
+# Author: Robbie Pope
+# Date: 01 Oct 2024
+# Description: Defintion of DASH food groups for calculation as computed by:
+#              Fung et al. 2008, Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease and Stroke in Women
+#              Li et al. 2023, (Poly)phenol intake, plant-rich dietary patterns and cardiometabolic health: a cross-sectional study
+################################################################################
+rm(list=ls())
+
+# Load Libraries
+library(devtools)
+install_github("robbiepope/DietPattern")
+install_github("robbiepope/RFunctions")
+library(dplyr)
+library(glue)
+library(tidyr)
+library(readxl)
+library(devtools)
+library(DietPattern)
+library(RFunctions)
+
+# Load FFQ & metabolite 3yr df
+setwd("/Users/robbie/Library/CloudStorage/OneDrive-King'sCollegeLondon/6_FFQ_Metabolite_Validation/Diet_FaecalMetabolites/1_NEW_HLI_CDRF_2024")
+load("analysis_data/4_diet_index/ffq_HLI_DASHgroups.Rdata", .GlobalEnv) # Load aMed food groups df
+
+# Pivot-DF ----------------------------------------------------------------
+# Select relevant columns
+ffq_filt <- ffq_dash_groups %>%
+  select(c(1:3, 5:12))
+
+# Pivot df to correct format for PDI computation
+ffq_pivot <- gather(ffq_filt, key = "FoodGroup", value = "total_meal_portion", -Participant_ID, -ID, -FFQ_Version)
+
+# Define-Healthful-Groups -------------------------------------------------
+# Define list of healthy and less healthy for DASH score
+health_groups <- list(
+  healthy = c('nuts_legumes', 'whole_grain', 'fruit', 'vegetables', 'lf_dairy'),
+  less_healthy = c('meat', 'sodium', 'sugar_drink')
+  )
+
+# Create additional column assigning each food group to a healthy_group definition
+ffq_health <- ffq_pivot %>%
+  mutate(
+    HealthfulGroup = case_when(
+      FoodGroup %in% health_groups$healthy ~ "healthy",
+      FoodGroup %in% health_groups$less_healthy ~ "less_healthy",
+      TRUE ~ "other"
+    )
+  )
+
+# Define-Percentiles ------------------------------------------------------
+# Define percentiles
+ffq_quintile <- ffq_health %>%
+  group_by(FoodGroup) %>%
+  mutate(
+    total_meal_portion_jittered = total_meal_portion + runif(length(total_meal_portion), -1e-6, 1e-6),
+    Quintile = as.integer(cut(total_meal_portion_jittered, quantile(total_meal_portion_jittered, probs = 0:5/5), include.lowest = TRUE))
+  ) %>%
+  ungroup() %>%
+  select(-total_meal_portion_jittered)
+
+
+# Compute-DASH ------------------------------------------------------------
+# Define healthful and less_healthful scoring
+posneg <- list(
+  positive = c('healthy'),
+  negative = c('less_healthy')
+  )
+
+# Compute DASH score based on quintiles
+score_df <- ffq_quintile %>% 
+  mutate(PosNeg = case_when( # Assign healthful group pos / neg
+           HealthfulGroup %in% posneg$positive ~ 'positive',
+           HealthfulGroup %in% posneg$negative ~ 'negative',
+           TRUE ~ NA_character_
+           ),
+         DASH_score = if_else(PosNeg == 'positive', Quintile, 6 - Quintile) # Compute DASH score 
+         )
+
+# Compute final scores 
+dash_score <- score_df %>%
+  group_by(ID) %>%
+  summarise(DASH = sum(DASH_score))
+
+
+# Merge-FFQ-Info ----------------------------------------------------------
+# Merege FFQ_ID & date with PDI scores based on participant ID
+ffq_dash <- merge(ffq_dash_groups, dash_score, by = "ID")
+
+# Export df as RData
+setwd("/Users/robbie/Library/CloudStorage/OneDrive-King'sCollegeLondon/6_FFQ_Metabolite_Validation/Diet_FaecalMetabolites/1_NEW_HLI_CDRF_2024/analysis_data/4_diet_index")
+save(ffq_dash, file=glue("ffq_HLI_dash_score.RData"))
+

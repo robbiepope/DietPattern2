@@ -1,0 +1,15 @@
+Package: DietPattern2
+Title: Tools for Dietary Pattern Analysis for TwinsUK
+Version: 0.1.0
+Authors@R: person("Robbie", "Poep", email = "robert.pope@kcl.ac.uk", role = c("aut", "cre"))
+Description: Functions to calculate different dietary indices for TwinsUK.
+License: BSD_3_clause
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.3
+Imports:
+    dplyr,
+    tidyr,
+    magrittr,
+    stats
+
