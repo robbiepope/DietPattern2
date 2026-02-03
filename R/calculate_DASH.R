@@ -5,11 +5,11 @@
 #' DASH computation as described by Fung et al. (2008).
 #' TwinsUK specific FFQ line item & nutrient components as described by Pope et al. (2021).
 #' 
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param nutr.intakes Pre-processed TwinsUK estimated nutrient intakes .csv file,
 #'        the first column should be the unique identifier for each questionnaire.
-#' @param merge_col_name_est.intakes name of column to merge estimated food and 
+#' @param merge_col_name_food.intakes name of column to merge estimated food and 
 #'        nutrient intakes for food grams per day .csv file. Default is 'FFQ_ID'.
 #' @param merge_col_name_nutr.intakes name of column to merge estimated food and 
 #'        nutrient intakes for nutrient .csv file. Default is 'FFQ_ID'.
@@ -26,16 +26,16 @@
 #' @author Robbie Pope
 #' @export 
 #' 
-compute_twinsuk_dash <- function(est.intakes, 
+compute_twinsuk_dash <- function(food.intakes, 
                                  nutr.intakes,
-                                 merge_col_name_est.intakes = 'FFQ_ID',
+                                 merge_col_name_food.intakes = 'FFQ_ID',
                                  merge_col_name_nutr.intakes = 'FFQ_ID',
                                  perc = 0.2) {
   
   # Create aggregate food groups for DASH computation
-  df_dash_components <- get_dash_components(est.intakes = est.intakes, 
+  df_dash_components <- get_dash_components(food.intakes = food.intakes, 
                                             nutr.intakes = nutr.intakes, 
-                                            merge_col_name_est.intakes = merge_col_name_est.intakes,
+                                            merge_col_name_food.intakes = merge_col_name_food.intakes,
                                             merge_col_name_nutr.intakes = merge_col_name_nutr.intakes)
   
   # Calculate DASH using TwinsUK food groupings
@@ -90,11 +90,11 @@ calculate_dash <- function(df_dash_components,
 #' the DASH diet score. Standard groupings (Pope et al. (2025)), or custom groupings for
 #' each component can be used. 
 #'
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param nutr.intakes Pre-processed TwinsUK estimated nutrient intakes .csv file,
 #'        the first column should be the unique identifier for each questionnaire.
-#' @param merge_col_name_est.intakes name of column to merge estimated food and 
+#' @param merge_col_name_food.intakes name of column to merge estimated food and 
 #'        nutrient intakes for food grams per day .csv file. Default is 'FFQ_ID'.
 #' @param merge_col_name_nutr.intakes name of column to merge estimated food and 
 #'        nutrient intakes for nutrient .csv file. Default is 'FFQ_ID'.
@@ -110,9 +110,9 @@ calculate_dash <- function(df_dash_components,
 #' @author Robbie Pope
 #' @export
 #'
-get_dash_components <- function(est.intakes, 
+get_dash_components <- function(food.intakes, 
                                 nutr.intakes, 
-                                merge_col_name_est.intakes = 'FFQ_ID',
+                                merge_col_name_food.intakes = 'FFQ_ID',
                                 merge_col_name_nutr.intakes = 'FFQ_ID',
                                 stnd_components = "Y",
                                 alt_components = NULL
@@ -122,7 +122,7 @@ get_dash_components <- function(est.intakes,
   stnd_components <- match.arg(stnd_components, choices = c("Y", "N"))
   
   # Extract unique identifier column (must be first column of grams per day .csv)
-  id_col <- est.intakes[[1]]
+  id_col <- food.intakes[[1]]
   
   # Use standard or alternative food and beverage groupings
   if (stnd_components == "Y") {
@@ -135,10 +135,10 @@ get_dash_components <- function(est.intakes,
   }
   
   # Summarise by food group (skipping missing columns)
-  summed_cols <- sum_dash_components(est.intakes = est.intakes,
+  summed_cols <- sum_dash_components(food.intakes = food.intakes,
                                      nutr.intakes = nutr.intakes,
                                      named_list = food_groups,
-                                     merge_col_name_est.intakes = 'FFQ_ID',
+                                     merge_col_name_food.intakes = 'FFQ_ID',
                                      merge_col_name_nutr.intakes = 'FFQ_ID')
   
   # Combine into final data frame — first col is ID
@@ -198,14 +198,14 @@ dash_standard_groupings <- function() {
 #' for TwinsUK EPIC FFQ
 #' FFQ line items (Pope et al. (2025)).
 #' 
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param nutr.intakes Pre-processed TwinsUK estimated nutrient intakes .csv file,
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param named_list Named list of food and nutrient group components, 
 #'        Each list element name should be a food/nutrient component of the DASH diet, 
 #'        and each value a character vector of column names.
-#' @param merge_col_name_est.intakes name of column to merge estimated food and 
+#' @param merge_col_name_food.intakes name of column to merge estimated food and 
 #'        nutrient intakes for food grams per day .csv file. Default is 'FFQ_ID'.
 #' @param merge_col_name_nutr.intakes name of column to merge estimated food and 
 #'        nutrient intakes for nutrient .csv file. Default is 'FFQ_ID'.
@@ -214,15 +214,15 @@ dash_standard_groupings <- function() {
 #' @author Robbie Pope
 #' @keywords internal
 #'         
-sum_dash_components <- function(est.intakes,
+sum_dash_components <- function(food.intakes,
                                 nutr.intakes, 
                                 named_list,
-                                merge_col_name_est.intakes = 'FFQ_ID',
+                                merge_col_name_food.intakes = 'FFQ_ID',
                                 merge_col_name_nutr.intakes = 'FFQ_ID'
                                 ) {
   
-  df_merge <- merge(est.intakes, nutr.intakes, 
-                    by.x = merge_col_name_est.intakes,
+  df_merge <- merge(food.intakes, nutr.intakes, 
+                    by.x = merge_col_name_food.intakes,
                     by.y = merge_col_name_nutr.intakes)
   
   summed_groups <- lapply(names(named_list), function(group_name) {

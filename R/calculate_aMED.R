@@ -5,16 +5,16 @@
 #' aMED computation as described by Fung et al. (2005).
 #' TwinsUK specific FFQ line item & nutrient components as described by Asnicar et al. (2021).
 #' 
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param nutr.intakes Pre-processed TwinsUK estimated nutrient intakes .csv file,
 #'        the first column should be the unique identifier for each questionnaire.
-#' @param merge_col_name_est.intakes name of column to merge estimated food and 
+#' @param merge_col_name_food.intakes name of column to merge estimated food and 
 #'        nutrient intakes for food grams per day .csv file. Default is 'FFQ_ID'.
 #' @param merge_col_name_nutr.intakes name of column to merge estimated food and 
 #'        nutrient intakes for nutrient .csv file. Default is 'FFQ_ID'.
 #'        the first column should be the unique identifier for each questionnaire.
-#' @param sex_col Name of the column containing sex information in \code{est.intakes} (default: 'Sex').
+#' @param sex_col Name of the column containing sex information in \code{food.intakes} (default: 'Sex').
 #' @param female_alcohol Numeric vector of length 2 specifying the lower and upper alcohol intake limits for females (default: c(5, 15) g/day).
 #' @param male_alcohol Numeric vector of length 2 specifying the lower and upper alcohol intake limits for males (default: c(5, 25) g/day).
 #' @param return_medians Logical, whether to return population medians along with final aMED scores (default: TRUE).
@@ -31,9 +31,9 @@
 #' @author Robbie Pope
 #' @export 
 #' 
-compute_twinsuk_aMED <- function(est.intakes, 
+compute_twinsuk_aMED <- function(food.intakes, 
                                  nutr.intakes,
-                                 merge_col_name_est.intakes = 'FFQ_ID',
+                                 merge_col_name_food.intakes = 'FFQ_ID',
                                  merge_col_name_nutr.intakes = 'FFQ_ID',
                                  sex_col = 'Sex',
                                  female_alcohol = c(5, 15),
@@ -41,17 +41,17 @@ compute_twinsuk_aMED <- function(est.intakes,
                                  return_medians = TRUE) {
   
   # Create aggregate food groups for PDI computation
-  df_aMED_components <- get_aMED_components(est.intakes = est.intakes, 
+  df_aMED_components <- get_aMED_components(food.intakes = food.intakes, 
                                             nutr.intakes = nutr.intakes, 
-                                            merge_col_name_est.intakes = merge_col_name_est.intakes,
+                                            merge_col_name_food.intakes = merge_col_name_food.intakes,
                                             merge_col_name_nutr.intakes = merge_col_name_nutr.intakes,
                                             stnd_components = 'Y'
                                             )
   
   # Calculate aMED using TwinsUK defined groupings for aMED components
   df_amed <- calculate_aMED(df_aMED_components,
-                            est.intakes,
-                            id_col = merge_col_name_est.intakes,
+                            food.intakes,
+                            id_col = merge_col_name_food.intakes,
                             sex_col = sex_col,
                             female_alcohol = female_alcohol,
                             male_alcohol = male_alcohol,
@@ -68,7 +68,7 @@ compute_twinsuk_aMED <- function(est.intakes,
 #' 
 #' @param df_aMED_components A data frame of estimated intakes for the 9 aMED components (wide format).
 #'        The first column must be a unique identifier for each FFQ.
-#' @param est.intakes A data frame containing the unique identifier, sex, and estimated intakes for each individual.
+#' @param food.intakes A data frame containing the unique identifier, sex, and estimated intakes for each individual.
 #' @param id_col Name of the column containing the unique identifier (default: 'FFQ_ID').
 #' @param sex_col Name of the column containing sex information (default: 'Sex').
 #' @param female_alcohol Numeric vector of length 2 specifying the lower and upper alcohol intake limits
@@ -94,7 +94,7 @@ compute_twinsuk_aMED <- function(est.intakes,
 #' @export
 #' 
 calculate_aMED <- function(df_aMED_components,
-                           est.intakes,
+                           food.intakes,
                            id_col = 'FFQ_ID',
                            sex_col = 'Sex',
                            female_alcohol = c(5, 15),
@@ -121,11 +121,11 @@ calculate_aMED <- function(df_aMED_components,
   }
   
   # Check ID and Sex columns exist
-  if (!id_col %in% colnames(est.intakes)) {
-    stop(paste("Specified ID column:", id_col, "not found in est.intakes"))
+  if (!id_col %in% colnames(food.intakes)) {
+    stop(paste("Specified ID column:", id_col, "not found in food.intakes"))
   }
-  if (!sex_col %in% colnames(est.intakes)) {
-    stop(paste("Specified Sex column:", sex_col, "not found in est.intakes"))
+  if (!sex_col %in% colnames(food.intakes)) {
+    stop(paste("Specified Sex column:", sex_col, "not found in food.intakes"))
   }
   
   # Extract sex-specific alcohol ranges
@@ -140,7 +140,7 @@ calculate_aMED <- function(df_aMED_components,
   # Assign score based on population median intake / alcohol range
   long_df <- assign_aMED_scores(
     long_df,
-    est.intakes,
+    food.intakes,
     id_col = id_col,
     sex_col = sex_col,
     female_low = female_low,
@@ -172,11 +172,11 @@ calculate_aMED <- function(df_aMED_components,
 #' the aMED diet score. Standard groupings as described by Asnicar et al. (2021), 
 #' or custom groupings for each component can be used. 
 #'
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param nutr.intakes Pre-processed TwinsUK estimated nutrient intakes .csv file,
 #'        the first column should be the unique identifier for each questionnaire.
-#' @param merge_col_name_est.intakes name of column to merge estimated food and 
+#' @param merge_col_name_food.intakes name of column to merge estimated food and 
 #'        nutrient intakes for food grams per day .csv file. Default is 'FFQ_ID'.
 #' @param merge_col_name_nutr.intakes name of column to merge estimated food and 
 #'        nutrient intakes for nutrient .csv file. Default is 'FFQ_ID'.
@@ -192,9 +192,9 @@ calculate_aMED <- function(df_aMED_components,
 #' @author Robbie Pope
 #' @export
 #'
-get_aMED_components <- function(est.intakes, 
+get_aMED_components <- function(food.intakes, 
                                 nutr.intakes, 
-                                merge_col_name_est.intakes = 'FFQ_ID',
+                                merge_col_name_food.intakes = 'FFQ_ID',
                                 merge_col_name_nutr.intakes = 'FFQ_ID',
                                 stnd_components = "Y",
                                 alt_components = NULL
@@ -204,7 +204,7 @@ get_aMED_components <- function(est.intakes,
   stnd_components <- match.arg(stnd_components, choices = c("Y", "N"))
   
   # Extract unique identifier column (must be first column of grams per day .csv)
-  id_col <- est.intakes[[1]]
+  id_col <- food.intakes[[1]]
   
   # Calculate MUFA/SFA ratio
   nutr.intakes$mufa_sfa_ratio <- nutr.intakes$MUFA_total_g / nutr.intakes$SFA_total_g
@@ -220,7 +220,7 @@ get_aMED_components <- function(est.intakes,
   }
   
   # Summarise by food group (skipping missing columns)
-  summed_cols <- sum_aMED_components(est.intakes = est.intakes,
+  summed_cols <- sum_aMED_components(food.intakes = food.intakes,
                                      nutr.intakes = nutr.intakes,
                                      named_list = food_groups)
   
@@ -281,7 +281,7 @@ aMED_standard_groupings <- function() {
 #' for TwinsUK EPIC FFQ
 #' FFQ line items (Asnicar et al. (2021)).
 #' 
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param nutr.intakes Pre-processed TwinsUK estimated nutrient intakes .csv file,
 #'        the first column should be the unique identifier for each questionnaire.
@@ -293,14 +293,14 @@ aMED_standard_groupings <- function() {
 #' @author Robbie Pope
 #' @keywords internal
 #'         
-sum_aMED_components <- function(est.intakes,
+sum_aMED_components <- function(food.intakes,
                                 nutr.intakes, 
                                 named_list
                                 ) {
   
   # Get unique identifier
-  id_col <- colnames(est.intakes)[1]
-  df_merge <- merge(est.intakes, nutr.intakes, 
+  id_col <- colnames(food.intakes)[1]
+  df_merge <- merge(food.intakes, nutr.intakes, 
                     by.x = id_col,
                     by.y = id_col)
 
@@ -476,7 +476,7 @@ aMED_score_logic <- function(row,
 #' population median or within specified alcohol range. 
 #' 
 #' @param long_df long df of etimated intakes of aMED components. Output from assign_aMED_health_groups 
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param id_col Name of the column containing the unique identifier (default: 'FFQ_ID').
 #' @param sex_col Name of the column containing sex information (default: 'Sex').
@@ -490,7 +490,7 @@ aMED_score_logic <- function(row,
 #' @keywords internal
 #' 
 assign_aMED_scores <- function(long_df,
-                               est.intakes,
+                               food.intakes,
                                id_col = 'FFQ_ID',
                                sex_col = 'Sex',
                                female_low = 5,
@@ -502,7 +502,7 @@ assign_aMED_scores <- function(long_df,
   medians_df <- get_aMED_medians(long_df)
   
   # Merge to get Sex column
-  df_sex <- est.intakes[, c(id_col, sex_col)]
+  df_sex <- food.intakes[, c(id_col, sex_col)]
   df_merge <- merge(long_df, df_sex, by=id_col)
   
   # Score each component of the aMED diet index

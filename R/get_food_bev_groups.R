@@ -4,7 +4,7 @@
 #' daily intakes for amalgamated food and beverage groups. Can be standard groupings
 #' (Asnicar et al. (2021)), or custom. 
 #'
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param stnd_groups Character either "Y" (yes) or "N" (no) to determine if 
 #'        standard Asnicar et al. (2021) groupings are used.
@@ -16,7 +16,7 @@
 #' @author Robbie Pope
 #' @export
 #'
-get_food_bev_groups <- function(est.intakes, 
+get_food_bev_groups <- function(food.intakes, 
                                 stnd_groups = "Y",
                                 alt_groups = NULL
                                 ) {
@@ -25,7 +25,7 @@ get_food_bev_groups <- function(est.intakes,
   stnd_groups <- match.arg(stnd_groups, choices = c("Y", "N"))
   
   # Extract unique identifier column (must be first column of grams per day .csv)
-  id_col <- est.intakes[[1]]
+  id_col <- food.intakes[[1]]
   
   # Use standard or alternative food and beverage groupings
   if (stnd_groups == "Y") {
@@ -38,7 +38,7 @@ get_food_bev_groups <- function(est.intakes,
   }
   
   # Summarise by food group (skipping missing columns)
-  summed_cols <- sum_food_groups(est.intakes, food_groups)
+  summed_cols <- sum_food_groups(food.intakes, food_groups)
   
   # Combine into final data frame — first col is ID
   summed_df <- data.frame(
@@ -120,7 +120,7 @@ standard_groupings <- function() {
 #' Define standard amalgamated food and beverage groups based on TwinsUK EPIC 
 #' FFQ line items (Asnicar et al. (2021)).
 #' 
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param named_list Named list of food and beverage group definitions, 
 #'        Each list element name should be a food group, and each value a 
@@ -130,16 +130,16 @@ standard_groupings <- function() {
 #' @author Robbie Pope
 #' @keywords internal
 #'         
-sum_food_groups <- function(est.intakes, 
+sum_food_groups <- function(food.intakes, 
                             named_list
                             ) {
   summed_groups <- lapply(names(named_list), function(group_name) {
     cols <- named_list[[group_name]]
-    cols_present <- cols[cols %in% colnames(est.intakes)]
+    cols_present <- cols[cols %in% colnames(food.intakes)]
     if (length(cols_present) == 0) {
-      return(rep(0, nrow(est.intakes)))
+      return(rep(0, nrow(food.intakes)))
     }
-    rowSums(est.intakes[, cols_present, drop = FALSE], na.rm = TRUE)
+    rowSums(food.intakes[, cols_present, drop = FALSE], na.rm = TRUE)
   })
   return(summed_groups)
 }

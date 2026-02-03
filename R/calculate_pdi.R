@@ -6,7 +6,7 @@
 #' PDI computation as described by Satija et al. (2017).
 #' TwinsUK specific FFQ line item groupings as described by Asnicar et al. (2021).
 #' 
-#' @param est.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
+#' @param food.intakes Pre-processed TwinsUK estimated intake .csv file (grams per day).
 #'        the first column should be the unique identifier for each questionnaire.
 #' @param perc proportion of distribution for each bin, float between 0 and 1 (default 0.2 for quintiles).
 #' @return A df containing the calculated PDI, hPDI and uPDI scores and estimated intakes 
@@ -22,11 +22,11 @@
 #' @author Robbie Pope
 #' @export 
 #' 
-compute_twinsuk_pdi <- function(est.intakes, 
+compute_twinsuk_pdi <- function(food.intakes, 
                                 perc = 0.2) {
   
   # Create aggregate food groups for PDI computation
-  df_food_groups <- get_food_bev_groups(est.intakes = est.intakes, 
+  df_food_groups <- get_food_bev_groups(food.intakes = food.intakes, 
                                         stnd_groups = "Y")
   
   # Calculate pdi using TwinsUK food groupings
