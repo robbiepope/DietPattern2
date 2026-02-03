@@ -22,18 +22,18 @@
 .Rproj.user/
 *.Rproj
 
-# produced vignettes
+# Produced vignettes
 vignettes/*.html
 vignettes/*.pdf
 
-# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
+# OAuth2 token
 .httr-oauth
 
-# knitr and R markdown default cache directories
+# knitr and R Markdown cache directories
 *_cache/
-/cache/
+.cache/
 
-# Temporary files created by R markdown
+# Temporary files created by R Markdown
 *.utf8.md
 *.knit.md
 
@@ -43,8 +43,21 @@ vignettes/*.pdf
 # pkgdown site
 docs/
 
-# translation temp files
+# Translation temp files
 po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# macOS system files
+.DS_Store
+
+# Local R build ignore
+.Rbuildignore
+
+# Local project profile
+.Rprofile
+
+# Local renv files (lockfile tracked, folder ignored)
+renv/
+renv.lock
