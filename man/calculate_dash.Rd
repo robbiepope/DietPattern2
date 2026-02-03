@@ -26,10 +26,7 @@ The calculate_dash function is a wrapper to perform all necessary steps to compu
 each derivation of the score.
 }
 \references{
-Fung, T. et al. (2008)
-            *Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease 
-            and Stroke in Women*
-            Archives of Internal Medicine 168(7):713-720.
+Fung, T. et al. (2008) *Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease and Stroke in Women* Archives of Internal Medicine 168(7):713-720.
 }
 \author{
 Robbie Pope

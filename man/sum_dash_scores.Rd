@@ -7,7 +7,7 @@
 sum_dash_scores(long_df)
 }
 \arguments{
-\item{long_df}{long df with assigned ranked percentile scores. Output from assign_pdi_scores.}
+\item{long_df}{long df with assigned ranked percentile scores. Output from assign_dash_scores.}
 }
 \value{
 df with summed DASH score for each individual FFQ and estimated intake for each component.

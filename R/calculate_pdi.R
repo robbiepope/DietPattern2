@@ -17,15 +17,8 @@
 #'         \item{uPDI}{Unhealthful Plant-based Dietary Index}
 #'         \item{FooGroups}{Individual est. intakes for 18 food groups}
 #'         }
-#' @references Satija, A. et al. (2017)
-#'             *Healthful and unhealthful plant-based diets and the risk of 
-#'             coronary heart disease in US adults.* 
-#'             J Am Coll Cardiol 70(4):411–422.
-#'             
-#'             Asnicar et al. (2021)
-#'             *Microbiome connections with host metabolism and habitual diet 
-#'             from 1,098 deeply phenotyped individuals.*
-#'             Nature Medicine 27(2):321-332.
+#' @references Satija, A. et al. (2017) *Healthful and unhealthful plant-based diets and the risk of  coronary heart disease in US adults.* J Am Coll Cardiol 70(4):411–422.
+#'             Asnicar et al. (2021) *Microbiome connections with host metabolism and habitual diet from 1,098 deeply phenotyped individuals.* Nature Medicine 27(2):321-332.
 #' @author Robbie Pope
 #' @export 
 #' 
@@ -58,10 +51,7 @@ compute_twinsuk_pdi <- function(est.intakes,
 #'         \item{hPDI}{Healthful Plant-based Dietary Index}
 #'         \item{uPDI}{Unhealthful Plant-based Dietary Index}
 #'         }
-#' @references Satija, A. et al. (2017)
-#'             *Healthful and unhealthful plant-based diets and the risk of 
-#'             coronary heart disease in US adults.* 
-#'             J Am Coll Cardiol 70(4):411–422.
+#' @references Satija, A. et al. (2017) *Healthful and unhealthful plant-based diets and the risk of coronary heart disease in US adults.* J Am Coll Cardiol 70(4):411–422.
 #' @author Robbie Pope
 #' @export 
 #' 
@@ -123,7 +113,7 @@ assign_health_groups <- function(df) {
   
   # Create long df of estimated intakes for PDI groups
   long_df <- data.frame(
-    UniqueKey = rep(unq_id_values, times = ncol(df) - 1),
+    FFQ_ID = rep(unq_id_values, times = ncol(df) - 1),
     FoodGroup = rep(names(df)[-1], each = nrow(df)),
     Estimated_Intake = as.vector(as.matrix(df[, -1]))
     )
@@ -289,7 +279,7 @@ assign_pdi_scores <- function(long_df) {
 sum_pdi_scores <- function(long_df) {
   # Compute PDI, hPDI, and uPDI scores for each FFQ
   score_df <- long_df |>
-    dplyr::group_by(UniqueKey) |>
+    dplyr::group_by(FFQ_ID) |>
     dplyr::summarise(
       PDI  = sum(PDI_score,  na.rm = TRUE),
       hPDI = sum(hPDI_score, na.rm = TRUE),
@@ -299,7 +289,7 @@ sum_pdi_scores <- function(long_df) {
   
   # Summarise estimated intake for each PDI food group per FFQ
   intake_df <- long_df |>
-    dplyr::group_by(UniqueKey, FoodGroup) |>
+    dplyr::group_by(FFQ_ID, FoodGroup) |>
     dplyr::summarise(
       Estimated_Intake = sum(Estimated_Intake, na.rm = TRUE),
       .groups = "drop"
@@ -311,7 +301,7 @@ sum_pdi_scores <- function(long_df) {
     )
   
   # Join summed PDI scores and food group intakes
-  final_df <- dplyr::left_join(score_df, intake_df, by = "UniqueKey")
-  final_df <- final_df %>% dplyr::rename(FFQ_ID = UniqueKey)
+  final_df <- dplyr::left_join(score_df, intake_df, by = "FFQ_ID")
+  final_df <- final_df %>% dplyr::rename(FFQ_ID = FFQ_ID)
   return(final_df)
 }

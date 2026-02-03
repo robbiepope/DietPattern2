@@ -42,7 +42,7 @@ get_food_bev_groups <- function(est.intakes,
   
   # Combine into final data frame — first col is ID
   summed_df <- data.frame(
-    UniqueKey = id_col,
+    FFQ_ID = id_col,
     as.data.frame(summed_cols, check.names = FALSE),
     stringsAsFactors = FALSE
     )
@@ -51,7 +51,7 @@ get_food_bev_groups <- function(est.intakes,
   colnames(summed_df)[-1] <- names(food_groups)
   
   # Check lengths must match
-  stopifnot(length(summed_df$UniqueKey) == nrow(summed_df))
+  stopifnot(length(summed_df$FFQ_ID) == nrow(summed_df))
   
   return(summed_df)
 }

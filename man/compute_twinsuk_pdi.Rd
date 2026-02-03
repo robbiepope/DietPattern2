@@ -30,15 +30,8 @@ PDI computation as described by Satija et al. (2017).
 TwinsUK specific FFQ line item groupings as described by Asnicar et al. (2021).
 }
 \references{
-Satija, A. et al. (2017)
-            *Healthful and unhealthful plant-based diets and the risk of 
-            coronary heart disease in US adults.* 
-            J Am Coll Cardiol 70(4):411–422.
-            
-            Asnicar et al. (2021)
-            *Microbiome connections with host metabolism and habitual diet 
-            from 1,098 deeply phenotyped individuals.*
-            Nature Medicine 27(2):321-332.
+Satija, A. et al. (2017) *Healthful and unhealthful plant-based diets and the risk of  coronary heart disease in US adults.* J Am Coll Cardiol 70(4):411–422.
+            Asnicar et al. (2021) *Microbiome connections with host metabolism and habitual diet from 1,098 deeply phenotyped individuals.* Nature Medicine 27(2):321-332.
 }
 \author{
 Robbie Pope

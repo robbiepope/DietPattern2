@@ -21,15 +21,8 @@
 #'         \item{DASH}{Overall PLant-based Dietary Index}
 #'         \item{DASH_Components}{Individual est. intakes for 8 DASH components}
 #'         }
-#' @references Fung, T. et al. (2008)
-#'             *Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease 
-#'             and Stroke in Women*
-#'             Archives of Internal Medicine 168(7):713-720.
-#'             
-#'             Pope et al. (2025)
-#'             *Faecal metabolites as a readout of habitual diet capture dietary 
-#'             interactions with the gut microbiome*
-#'             Nature Communications 16(1):10051.
+#' @references Fung, T. et al. (2008) *Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease and Stroke in Women* Archives of Internal Medicine 168(7):713-720.
+#'             Pope et al. (2025) *Faecal metabolites as a readout of habitual diet capture dietary interactions with the gut microbiome* Nature Communications 16(1):10051.
 #' @author Robbie Pope
 #' @export 
 #' 
@@ -39,13 +32,13 @@ compute_twinsuk_dash <- function(est.intakes,
                                  merge_col_name_nutr.intakes = 'FFQ_ID',
                                  perc = 0.2) {
   
-  # Create aggregate food groups for PDI computation
+  # Create aggregate food groups for DASH computation
   df_dash_components <- get_dash_components(est.intakes = est.intakes, 
                                             nutr.intakes = nutr.intakes, 
                                             merge_col_name_est.intakes = merge_col_name_est.intakes,
                                             merge_col_name_nutr.intakes = merge_col_name_nutr.intakes)
   
-  # Calculate pdi using TwinsUK food groupings
+  # Calculate DASH using TwinsUK food groupings
   df_dash <- calculate_dash(df_dash_components,
                             perc = perc)
   
@@ -67,10 +60,7 @@ compute_twinsuk_dash <- function(est.intakes,
 #'         \item{DASH}{Overall PLant-based Dietary Index}
 #'         \item{DASH_Components}{Individual est. intakes for 8 DASH components}
 #'         }
-#' @references Fung, T. et al. (2008)
-#'             *Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease 
-#'             and Stroke in Women*
-#'             Archives of Internal Medicine 168(7):713-720.
+#' @references Fung, T. et al. (2008) *Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease and Stroke in Women* Archives of Internal Medicine 168(7):713-720.
 #'             
 #' @author Robbie Pope
 #' @export 
@@ -153,7 +143,7 @@ get_dash_components <- function(est.intakes,
   
   # Combine into final data frame — first col is ID
   summed_df <- data.frame(
-    UniqueKey = id_col,
+    FFQ_ID = id_col,
     as.data.frame(summed_cols, check.names = FALSE),
     stringsAsFactors = FALSE
   )
@@ -162,7 +152,7 @@ get_dash_components <- function(est.intakes,
   colnames(summed_df)[-1] <- names(food_groups)
   
   # Check lengths must match
-  stopifnot(length(summed_df$UniqueKey) == nrow(summed_df))
+  stopifnot(length(summed_df$FFQ_ID) == nrow(summed_df))
   
   return(summed_df)
   }
@@ -280,9 +270,9 @@ assign_dash_health_groups <- function(df) {
   # Define health groups
   health_groups <- dash_health_groups()
   
-  # Create long df of estimated intakes for PDI groups
+  # Create long df of estimated intakes for DASH groups
   long_df <- data.frame(
-    UniqueKey = rep(unq_id_values, times = ncol(df) - 1),
+    FFQ_ID = rep(unq_id_values, times = ncol(df) - 1),
     FoodGroup = rep(names(df)[-1], each = nrow(df)),
     Estimated_Intake = as.vector(as.matrix(df[, -1]))
   )
@@ -296,14 +286,14 @@ assign_dash_health_groups <- function(df) {
     long_df$HealthfulGroup[long_df$FoodGroup %in% members] <- group_name
   }
   
-  # Remove the other category (Alcoholic Beverages & Margaine) as not included in PDI calculation
+  # Remove the other category as not included in calculation
   long_df <- long_df[long_df$HealthfulGroup != "other", ]
   
-  # Return long_df for pdi calculation
+  # Return long_df for DASH calculation
   return(long_df)
 }
 
-#' assign_pdi_scores
+#' assign_dash_scores
 #' 
 #' Assign DASH scores to each component based on percentile and group classification.
 #' 
@@ -314,7 +304,7 @@ assign_dash_health_groups <- function(df) {
 #' @keywords internal
 #' 
 assign_dash_scores <- function(long_df) {
-  # Score for PDI
+  # Score for DASH
   long_df <- score_logic(long_df,
                          positive_groups = c("positive"),
                          negative_groups = c("negative"),
@@ -326,7 +316,7 @@ assign_dash_scores <- function(long_df) {
 #' 
 #' Sum the ranked percentile scores for DASH score
 #' 
-#' @param long_df long df with assigned ranked percentile scores. Output from assign_pdi_scores.
+#' @param long_df long df with assigned ranked percentile scores. Output from assign_dash_scores.
 #' @return df with summed DASH score for each individual FFQ and estimated intake for each component.
 #' @author Robbie Pope
 #' @keywords internal
@@ -336,17 +326,17 @@ assign_dash_scores <- function(long_df) {
 #' @importFrom magrittr %>%
 #' 
 sum_dash_scores <- function(long_df) {
-  # Compute PDI, hPDI, and uPDI scores for each FFQ
+  # Compute DASH score for each FFQ
   score_df <- long_df |>
-    dplyr::group_by(UniqueKey) |>
+    dplyr::group_by(FFQ_ID) |>
     dplyr::summarise(
       DASH  = sum(DASH_score,  na.rm = TRUE),
       .groups = "drop"
     )
   
-  # Summarise estimated intake for each PDI food group per FFQ
+  # Summarise estimated intake for each DASH component per FFQ
   intake_df <- long_df |>
-    dplyr::group_by(UniqueKey, FoodGroup) |>
+    dplyr::group_by(FFQ_ID, FoodGroup) |>
     dplyr::summarise(
       Estimated_Intake = sum(Estimated_Intake, na.rm = TRUE),
       .groups = "drop"
@@ -357,8 +347,7 @@ sum_dash_scores <- function(long_df) {
       values_fill = 0
     )
   
-  # Join summed PDI scores and food group intakes
-  final_df <- dplyr::left_join(score_df, intake_df, by = "UniqueKey")
-  final_df <- final_df %>% dplyr::rename(FFQ_ID = UniqueKey)
+  # Join summed DASH scores and food group intakes
+  final_df <- dplyr::left_join(score_df, intake_df, by = "FFQ_ID")
   return(final_df)
 }

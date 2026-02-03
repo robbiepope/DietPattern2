@@ -26,10 +26,7 @@ The calculate_pdi function is a wrapper to perform all necessary steps to comput
 each derivation of the score.
 }
 \references{
-Satija, A. et al. (2017)
-            *Healthful and unhealthful plant-based diets and the risk of 
-            coronary heart disease in US adults.* 
-            J Am Coll Cardiol 70(4):411–422.
+Satija, A. et al. (2017) *Healthful and unhealthful plant-based diets and the risk of coronary heart disease in US adults.* J Am Coll Cardiol 70(4):411–422.
 }
 \author{
 Robbie Pope

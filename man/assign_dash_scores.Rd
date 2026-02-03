@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_DASH.R
 \name{assign_dash_scores}
 \alias{assign_dash_scores}
-\title{assign_pdi_scores}
+\title{assign_dash_scores}
 \usage{
 assign_dash_scores(long_df)
 }

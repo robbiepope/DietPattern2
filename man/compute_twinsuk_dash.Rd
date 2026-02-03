@@ -43,15 +43,8 @@ DASH computation as described by Fung et al. (2008).
 TwinsUK specific FFQ line item & nutrient components as described by Pope et al. (2021).
 }
 \references{
-Fung, T. et al. (2008)
-            *Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease 
-            and Stroke in Women*
-            Archives of Internal Medicine 168(7):713-720.
-            
-            Pope et al. (2025)
-            *Faecal metabolites as a readout of habitual diet capture dietary 
-            interactions with the gut microbiome*
-            Nature Communications 16(1):10051.
+Fung, T. et al. (2008) *Adherence to a DASH-Style Diet and Risk of Coronary Heart Disease and Stroke in Women* Archives of Internal Medicine 168(7):713-720.
+            Pope et al. (2025) *Faecal metabolites as a readout of habitual diet capture dietary interactions with the gut microbiome* Nature Communications 16(1):10051.
 }
 \author{
 Robbie Pope
