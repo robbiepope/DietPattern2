@@ -60,9 +60,6 @@ residual_energy_adjust <- function(intakes,
     stop("start_col must be less than or equal to end_col.")
   }
   
-  if (energy_col < start_col || energy_col > end_col) {
-    stop("energy_col must lie between start_col and end_col.")
-  }
   
   df_adj <- intakes
   
