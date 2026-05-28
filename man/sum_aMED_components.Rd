@@ -4,10 +4,10 @@
 \alias{sum_aMED_components}
 \title{sum_aMED_components}
 \usage{
-sum_aMED_components(est.intakes, nutr.intakes, named_list)
+sum_aMED_components(food.intakes, nutr.intakes, named_list)
 }
 \arguments{
-\item{est.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
+\item{food.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
 the first column should be the unique identifier for each questionnaire.}
 
 \item{nutr.intakes}{Pre-processed TwinsUK estimated nutrient intakes .csv file,

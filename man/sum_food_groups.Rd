@@ -4,10 +4,10 @@
 \alias{sum_food_groups}
 \title{sum_food_groups}
 \usage{
-sum_food_groups(est.intakes, named_list)
+sum_food_groups(food.intakes, named_list)
 }
 \arguments{
-\item{est.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
+\item{food.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
 the first column should be the unique identifier for each questionnaire.}
 
 \item{named_list}{Named list of food and beverage group definitions, 

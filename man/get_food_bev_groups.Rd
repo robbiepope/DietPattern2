@@ -4,10 +4,10 @@
 \alias{get_food_bev_groups}
 \title{get_food_bev_groups}
 \usage{
-get_food_bev_groups(est.intakes, stnd_groups = "Y", alt_groups = NULL)
+get_food_bev_groups(food.intakes, stnd_groups = "Y", alt_groups = NULL)
 }
 \arguments{
-\item{est.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
+\item{food.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
 the first column should be the unique identifier for each questionnaire.}
 
 \item{stnd_groups}{Character either "Y" (yes) or "N" (no) to determine if 
@@ -24,6 +24,10 @@ Data frame with summed daily intakes for each food or beverage group.
 Take pre-prepared TwinsUK grams per day .csv files and compute the estimated
 daily intakes for amalgamated food and beverage groups. Can be standard groupings
 (Asnicar et al. (2021)), or custom.
+}
+\references{
+Asnicar et al. (2021) *Microbiome connections with host metabolism and habitual diet from 1,098 deeply phenotyped individuals.* Nature Medicine 27(2):321-332.
+            Pope et al. (2025) *Faecal metabolites as a readout of habitual diet capture dietary interactions with the gut microbiome* Nature Communications 16(1):10051.
 }
 \author{
 Robbie Pope

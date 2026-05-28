@@ -5,15 +5,15 @@
 \title{sum_dash_components}
 \usage{
 sum_dash_components(
-  est.intakes,
+  food.intakes,
   nutr.intakes,
   named_list,
-  merge_col_name_est.intakes = "FFQ_ID",
+  merge_col_name_food.intakes = "FFQ_ID",
   merge_col_name_nutr.intakes = "FFQ_ID"
 )
 }
 \arguments{
-\item{est.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
+\item{food.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
 the first column should be the unique identifier for each questionnaire.}
 
 \item{nutr.intakes}{Pre-processed TwinsUK estimated nutrient intakes .csv file,
@@ -23,7 +23,7 @@ the first column should be the unique identifier for each questionnaire.}
 Each list element name should be a food/nutrient component of the DASH diet, 
 and each value a character vector of column names.}
 
-\item{merge_col_name_est.intakes}{name of column to merge estimated food and 
+\item{merge_col_name_food.intakes}{name of column to merge estimated food and 
 nutrient intakes for food grams per day .csv file. Default is 'FFQ_ID'.}
 
 \item{merge_col_name_nutr.intakes}{name of column to merge estimated food and 

@@ -6,7 +6,7 @@
 \usage{
 calculate_aMED(
   df_aMED_components,
-  est.intakes,
+  food.intakes,
   id_col = "FFQ_ID",
   sex_col = "Sex",
   female_alcohol = c(5, 15),
@@ -18,7 +18,7 @@ calculate_aMED(
 \item{df_aMED_components}{A data frame of estimated intakes for the 9 aMED components (wide format).
 The first column must be a unique identifier for each FFQ.}
 
-\item{est.intakes}{A data frame containing the unique identifier, sex, and estimated intakes for each individual.}
+\item{food.intakes}{A data frame containing the unique identifier, sex, and estimated intakes for each individual.}
 
 \item{id_col}{Name of the column containing the unique identifier (default: 'FFQ_ID').}
 

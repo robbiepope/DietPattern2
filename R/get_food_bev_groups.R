@@ -13,6 +13,8 @@
 #'        be a food group, and each value a character vector of column names.
 #'
 #' @return Data frame with summed daily intakes for each food or beverage group.
+#' @references Asnicar et al. (2021) *Microbiome connections with host metabolism and habitual diet from 1,098 deeply phenotyped individuals.* Nature Medicine 27(2):321-332.
+#'             Pope et al. (2025) *Faecal metabolites as a readout of habitual diet capture dietary interactions with the gut microbiome* Nature Communications 16(1):10051.
 #' @author Robbie Pope
 #' @export
 #'

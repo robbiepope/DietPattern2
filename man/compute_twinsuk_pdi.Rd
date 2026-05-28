@@ -4,10 +4,10 @@
 \alias{compute_twinsuk_pdi}
 \title{compute_twinsuk_pdi}
 \usage{
-compute_twinsuk_pdi(est.intakes, perc = 0.2)
+compute_twinsuk_pdi(food.intakes, perc = 0.2)
 }
 \arguments{
-\item{est.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
+\item{food.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
 the first column should be the unique identifier for each questionnaire.}
 
 \item{perc}{proportion of distribution for each bin, float between 0 and 1 (default 0.2 for quintiles).}

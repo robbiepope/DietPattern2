@@ -5,22 +5,22 @@
 \title{get_dash_components}
 \usage{
 get_dash_components(
-  est.intakes,
+  food.intakes,
   nutr.intakes,
-  merge_col_name_est.intakes = "FFQ_ID",
+  merge_col_name_food.intakes = "FFQ_ID",
   merge_col_name_nutr.intakes = "FFQ_ID",
   stnd_components = "Y",
   alt_components = NULL
 )
 }
 \arguments{
-\item{est.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
+\item{food.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
 the first column should be the unique identifier for each questionnaire.}
 
 \item{nutr.intakes}{Pre-processed TwinsUK estimated nutrient intakes .csv file,
 the first column should be the unique identifier for each questionnaire.}
 
-\item{merge_col_name_est.intakes}{name of column to merge estimated food and 
+\item{merge_col_name_food.intakes}{name of column to merge estimated food and 
 nutrient intakes for food grams per day .csv file. Default is 'FFQ_ID'.}
 
 \item{merge_col_name_nutr.intakes}{name of column to merge estimated food and 

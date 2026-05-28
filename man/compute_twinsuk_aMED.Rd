@@ -5,9 +5,9 @@
 \title{compute_twinsuk_aMED}
 \usage{
 compute_twinsuk_aMED(
-  est.intakes,
+  food.intakes,
   nutr.intakes,
-  merge_col_name_est.intakes = "FFQ_ID",
+  merge_col_name_food.intakes = "FFQ_ID",
   merge_col_name_nutr.intakes = "FFQ_ID",
   sex_col = "Sex",
   female_alcohol = c(5, 15),
@@ -16,20 +16,20 @@ compute_twinsuk_aMED(
 )
 }
 \arguments{
-\item{est.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
+\item{food.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
 the first column should be the unique identifier for each questionnaire.}
 
 \item{nutr.intakes}{Pre-processed TwinsUK estimated nutrient intakes .csv file,
 the first column should be the unique identifier for each questionnaire.}
 
-\item{merge_col_name_est.intakes}{name of column to merge estimated food and 
+\item{merge_col_name_food.intakes}{name of column to merge estimated food and 
 nutrient intakes for food grams per day .csv file. Default is 'FFQ_ID'.}
 
 \item{merge_col_name_nutr.intakes}{name of column to merge estimated food and 
 nutrient intakes for nutrient .csv file. Default is 'FFQ_ID'.
 the first column should be the unique identifier for each questionnaire.}
 
-\item{sex_col}{Name of the column containing sex information in \code{est.intakes} (default: 'Sex').}
+\item{sex_col}{Name of the column containing sex information in \code{food.intakes} (default: 'Sex').}
 
 \item{female_alcohol}{Numeric vector of length 2 specifying the lower and upper alcohol intake limits for females (default: c(5, 15) g/day).}
 

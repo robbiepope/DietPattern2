@@ -6,7 +6,7 @@
 \usage{
 assign_aMED_scores(
   long_df,
-  est.intakes,
+  food.intakes,
   id_col = "FFQ_ID",
   sex_col = "Sex",
   female_low = 5,
@@ -18,7 +18,7 @@ assign_aMED_scores(
 \arguments{
 \item{long_df}{long df of etimated intakes of aMED components. Output from assign_aMED_health_groups}
 
-\item{est.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
+\item{food.intakes}{Pre-processed TwinsUK estimated intake .csv file (grams per day).
 the first column should be the unique identifier for each questionnaire.}
 
 \item{id_col}{Name of the column containing the unique identifier (default: 'FFQ_ID').}
